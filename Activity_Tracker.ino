@@ -27,16 +27,16 @@ void print_accel_values(sensors_event_t event)
   /* Display the results (acceleration is measured in m/s^2) */
   Serial.print("X: "); Serial.print(event.acceleration.x); Serial.print("  ");
   Serial.print("Y: "); Serial.print(event.acceleration.y); Serial.print("  ");
-  Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");Serial.println("m/s^2 ");
+  Serial.print("Z: "); Serial.print(event.acceleration.z); Serial.print("  ");Serial.println("m/s^2 ");          //print in xyz acceleration
 
 
   }
 
-float total_accel_calc(sensors_event_t event)
+float total_accel_calc(sensors_event_t event)                     
   {
      
      
-     float totaccel = sqrt(((event.acceleration.x)* (event.acceleration.x))+ ((event.acceleration.y)*(event.acceleration.y)) + ((event.acceleration.z)*(event.acceleration.z)));
+     float totaccel = sqrt(((event.acceleration.x)* (event.acceleration.x))+ ((event.acceleration.y)*(event.acceleration.y)) + ((event.acceleration.z)*(event.acceleration.z)));          //formula for total acceleration vector
      return totaccel;
   }
 
@@ -47,7 +47,7 @@ float get_avg_accel(sensors_event_t event,int points_to_average)
 
   float sum_vect = 0;
 
-  float avg_vect = 0;
+  float avg_vect = 0;                                    //set up variables
    
   for (int i = 1; i <= points_to_average; i++)
    {
@@ -63,7 +63,7 @@ float get_avg_accel(sensors_event_t event,int points_to_average)
   return avg_vect;
   
 }
-bool detect_step(float average_accel, float threshold, int gravity)
+bool detect_step(float average_accel, float threshold, int gravity)            //formula to detect steps
 {
   float diff = abs(average_accel - gravity);
   if (diff > threshold)
@@ -106,15 +106,15 @@ void loop(void)
   accel.getEvent(&event);
 
   float calories_b_step = .0375;
-  int points_to_average = 8;
-  float threshold = 1.5;
-  const int gravity = 10;
-  float upper = gravity + threshold;
-  float lower = gravity - threshold;
-  float avg_vect = 0;
-  avg_vect = get_avg_accel(event, points_to_average);
-  bool step_d = detect_step(avg_vect, threshold, gravity);
-  if(step_d && !already_counted)
+  int points_to_average = 8;                  //half of how many points are collected per second
+  float threshold = 1.5;                     //distance from average vector to both thresholds                         
+  const int gravity = 10;                     
+  float upper = gravity + threshold;          
+  float lower = gravity - threshold;         
+  float avg_vect = 0;                                           //set up variable
+  avg_vect = get_avg_accel(event, points_to_average);            
+  bool step_d = detect_step(avg_vect, threshold, gravity);       
+  if(step_d && !already_counted)                                 //when the total acceleration crosses one of the thresholds, it must go back to count another step
   {
     step_count++;
     already_counted = true;
@@ -123,7 +123,7 @@ void loop(void)
   {
     already_counted = false;
   }
-  total_cal_burned = step_count * calories_b_step;
+  total_cal_burned = step_count * calories_b_step;                                        //formula to calculate calories burned
     Serial.print("avg_vect: "); Serial.print(avg_vect); Serial.print(" ");
     Serial.print("step_count: "); Serial.print(step_count); Serial.print(" ");
     Serial.print("upper: "); Serial.print(upper); Serial.print(" ");
