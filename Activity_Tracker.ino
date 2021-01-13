@@ -7,6 +7,7 @@
 #include "Adafruit_BLE.h"
 #include "Adafruit_BluefruitLE_SPI.h"
 #include "Adafruit_BluefruitLE_UART.h"
+#include <Adafruit_GPS.h>
 
 #include "BluefruitConfig.h"
 
@@ -19,20 +20,19 @@
 #define MODE_LED_BEHAVIOUR          "MODE"
 #define DEBUG 0
 
+// Connect the GPS Power pin to 3.3V
+// Connect the GPS Ground pin to ground
+// Connect the GPS TX (transmit) pin to Digital 9
+// Connect the GPS RX (receive) pin to Digital 6
+
+// you can change the pin numbers to match your wiring:
+SoftwareSerial mySerial(9, 6);
+Adafruit_GPS GPS(&mySerial);
+
 // Create the bluefruit object, either software serial...uncomment these lines
-
-//SoftwareSerial bluefruitSS = SoftwareSerial(BLUEFRUIT_SWUART_TXD_PIN, BLUEFRUIT_SWUART_RXD_PIN);
-
-//Adafruit_BluefruitLE_UART ble(bluefruitSS, BLUEFRUIT_UART_MODE_PIN,
-
-//  BLUEFRUIT_UART_CTS_PIN, BLUEFRUIT_UART_RTS_PIN);
 
 /* ...or hardware serial, which does not need the RTS/CTS pins. Uncomment this line */
 Adafruit_BluefruitLE_UART ble(Serial1, BLUEFRUIT_UART_MODE_PIN);
-
-/* ...hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST */
-//Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
-
 
 void error(const __FlashStringHelper*err) {
 #if DEBUG
@@ -149,12 +149,12 @@ bool getUserInput(char buffer[], uint8_t maxSize)
 void setup(void)
 {
 
+ 
   while (!Serial);  // required for Flora & Micro
   delay(500);
 
   Serial.begin(115200);
-
-
+  
 #ifndef ESP8266
   while (!Serial);     // will pause Zero, Leonardo, etc until serial console opens
 #endif
@@ -244,11 +244,78 @@ void setup(void)
 #endif
   }
 
+    // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
+  GPS.begin(9600);
+
+  // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  // uncomment this line to turn on only the "minimum recommended" data
+  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+  // For parsing data, we don't suggest using anything but either RMC only or RMC+GGA since
+  // the parser doesn't care about other sentences at this time
+
+  // Set the update rate
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);   // 1 Hz update rate
+  // For the parsing code to work nicely and have time to sort thru the data, and
+  // print it out we don't suggest using anything higher than 1 Hz
+
+  // Request updates on antenna status, comment out to keep quiet
+  GPS.sendCommand(PGCMD_ANTENNA);
 
 }
+uint32_t timer = millis();
 void loop(void)
 {
+char c = GPS.read();
+  
+    // if a sentence is received, we can check the checksum, parse it...
+  if (GPS.newNMEAreceived()) {
+    // a tricky thing here is if we print the NMEA sentence, or data
+    // we end up not listening and catching other sentences!
+    // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
+    //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
 
+    if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
+      return;  // we can fail to parse a sentence in which case we should just wait for another
+  }
+
+  // approximately every 2 seconds or so, print out the current stats
+  if (millis() - timer > 2000) {
+    timer = millis(); // reset the timer
+
+//    Serial.print("\nTime: ");
+//    if (GPS.hour < 10) { Serial.print('0'); }
+//    Serial.print(GPS.hour, DEC); Serial.print(':');
+//    if (GPS.minute < 10) { Serial.print('0'); }
+//    Serial.print(GPS.minute, DEC); Serial.print(':');
+//    if (GPS.seconds < 10) { Serial.print('0'); }
+//    Serial.print(GPS.seconds, DEC); Serial.print('.');
+//    if (GPS.milliseconds < 10) {
+//      Serial.print("00");
+//    } else if (GPS.milliseconds > 9 && GPS.milliseconds < 100) {
+//      Serial.print("0");
+//    }
+//    Serial.println(GPS.milliseconds);
+//    Serial.print("Date: ");
+//    Serial.print(GPS.day, DEC); Serial.print('/');
+//    Serial.print(GPS.month, DEC); Serial.print("/20");
+//    Serial.println(GPS.year, DEC);
+//    Serial.print("Fix: "); Serial.print((int)GPS.fix);
+//    Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
+//    if (GPS.fix) 
+    {
+      Serial.print("Location: ");
+      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
+      Serial.print(", ");
+      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
+//
+//      Serial.print("Speed (knots): "); Serial.println(GPS.speed);
+//      Serial.print("Angle: "); Serial.println(GPS.angle);
+//      Serial.print("Altitude: "); Serial.println(GPS.altitude);
+//      Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
+    }
+  } 
+  
   /* Get a new sensor event */
   sensors_event_t event;
   accel.getEvent(&event);
