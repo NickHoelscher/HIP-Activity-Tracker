@@ -8,6 +8,21 @@
 #include "Adafruit_BluefruitLE_SPI.h"
 #include "Adafruit_BluefruitLE_UART.h"
 #include <Adafruit_GPS.h>
+#include <Arduino_JSON.h>
+
+
+
+
+
+
+//
+//#include <Adafruit_MQTT.h>
+
+
+
+
+
+
 
 #include "BluefruitConfig.h"
 
@@ -19,6 +34,48 @@
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
 #define MODE_LED_BEHAVIOUR          "MODE"
 #define DEBUG 0
+
+
+
+
+//
+//#define IO_USERNAME  "NicholasHoelscher"
+//#define IO_KEY       "aio_xocI87sGttoF5Va9Tom9HooMJVDy"
+
+
+
+
+
+//
+//// Store the MQTT server, username, and password in flash memory.
+//// This is required for using the Adafruit MQTT library.
+//const char MQTT_SERVER[] PROGMEM    = AIO_SERVER;
+//const char MQTT_USERNAME[] PROGMEM  = AIO_USERNAME;
+//const char MQTT_PASSWORD[] PROGMEM  = AIO_KEY;
+//
+//// Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
+//Adafruit_MQTT_Client mqtt(&client, MQTT_SERVER, AIO_SERVERPORT, MQTT_USERNAME, MQTT_PASSWORD);
+
+
+
+//
+//
+//
+//
+//const char ERRORS[] PROGMEM = IO_USERNAME "/errors";
+//Adafruit_MQTT_Subscribe errors = Adafruit_MQTT_Subscribe(&mqtt, ERRORS);
+//
+//const char THROTTLE[] PROGMEM = IO_USERNAME "/throttle";
+//Adafruit_MQTT_Subscribe throttle = Adafruit_MQTT_Subscribe(&mqtt, THROTTLE);
+
+
+
+
+
+
+
+
+
 
 // Connect the GPS Power pin to 3.3V
 // Connect the GPS Ground pin to ground
@@ -149,6 +206,31 @@ bool getUserInput(char buffer[], uint8_t maxSize)
 void setup(void)
 {
 
+
+
+
+
+
+
+
+
+//
+//  // ...network connection setup code here
+//
+//  // MQTT subscriptions for throttle & error messages
+//  mqtt.subscribe(&throttle);
+//  mqtt.subscribe(&errors);
+//
+//}
+//
+//
+
+
+
+
+
+
+
  
   while (!Serial);  // required for Flora & Micro
   delay(500);
@@ -266,6 +348,40 @@ void setup(void)
 uint32_t timer = millis();
 void loop(void)
 {
+
+
+
+
+//
+//
+//  // Ensure the connection to the MQTT server is alive (this will make the first
+//  // connection and automatically reconnect when disconnected).  See the MQTT_connect
+//  // function definition further below.
+//  MQTT_connect();
+//
+//  // this is our 'wait for incoming subscription packets' busy subloop
+//  // try to spend your time here
+//  Adafruit_MQTT_Subscribe *subscription;
+//  while ((subscription = mqtt.readSubscription(5000))) {
+//    if(subscription == &errors) {
+//      Serial.print(F("ERROR: "));
+//      Serial.println((char *)errors.lastread);
+//    } else if(subscription == &throttle) {
+//      Serial.print(F("THROTTLED: "));
+//      Serial.println((char *)throttle.lastread);
+//    }
+//  }
+//
+//  mqtt.ping();
+//
+//}
+//
+//
+
+
+
+
+  
 char c = GPS.read();
   
     // if a sentence is received, we can check the checksum, parse it...
@@ -280,7 +396,7 @@ char c = GPS.read();
   }
 
   // approximately every 2 seconds or so, print out the current stats
-  if (millis() - timer > 2000) {
+  if (millis() - timer > 500) {
     timer = millis(); // reset the timer
 
 //    Serial.print("\nTime: ");
@@ -303,17 +419,34 @@ char c = GPS.read();
 //    Serial.print("Fix: "); Serial.print((int)GPS.fix);
 //    Serial.print(" quality: "); Serial.println((int)GPS.fixquality);
 //    if (GPS.fix) 
-    {
-      Serial.print("Location: ");
-      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
-      Serial.print(", ");
-      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
+    //{
+
+
+
+
+
+
+    
+//      ble.print("AT+BLEUARTTX=");
+//      ble.print("Loc:");
+//      ble.print(GPS.latitude, 4); Serial.print(GPS.lat);
+//      ble.print(", ");
+//      ble.print(GPS.longitude, 4); Serial.print(GPS.lon);
+//      ble.print("\\n\n");
+
+
+
+
+
+
+
+
 //
 //      Serial.print("Speed (knots): "); Serial.println(GPS.speed);
 //      Serial.print("Angle: "); Serial.println(GPS.angle);
 //      Serial.print("Altitude: "); Serial.println(GPS.altitude);
 //      Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
-    }
+  //  }
   } 
   
   /* Get a new sensor event */
@@ -348,12 +481,17 @@ char c = GPS.read();
 #endif
 
   ble.print("AT+BLEUARTTX=");
-  ble.print(avg_vect);
+  ble.print(step_count);
+  ble.print(","); 
+  ble.print(GPS.latitude);
   ble.print(",");
-  ble.print(upper);
-  ble.print(",");
-  ble.print(lower);
-  ble.print(",");
+  ble.print(GPS.longitude);
+  
+//  ble.print(",");
+//  ble.print(upper);
+//  ble.print(",");
+//  ble.print(lower);
+//  ble.print(",");
   ble.print("\\n\n");
 
 
@@ -364,7 +502,7 @@ char c = GPS.read();
 #endif
   }
 
-  delay(100);
+  delay(2000);
 
 
 
