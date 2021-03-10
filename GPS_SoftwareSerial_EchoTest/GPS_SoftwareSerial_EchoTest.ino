@@ -18,7 +18,9 @@
 // Connect the GPS RX (receive) pin to Digital 7
 
 // You can change the pin numbers to match your wiring:
-SoftwareSerial mySerial(8, 7);
+SoftwareSerial mySerial(9, 6);
+Adafruit_GPS GPS(&mySerial);
+
 
 #define PMTK_SET_NMEA_UPDATE_1HZ  "$PMTK220,1000*1F"
 #define PMTK_SET_NMEA_UPDATE_5HZ  "$PMTK220,200*2C"
@@ -57,6 +59,7 @@ void loop() {
    char c = Serial.read();
    Serial.write(c);
    mySerial.write(c);
+   Serial.println(GPS.read());
   }
   if (mySerial.available()) {
     char c = mySerial.read();

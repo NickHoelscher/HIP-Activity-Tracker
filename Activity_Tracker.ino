@@ -20,6 +20,7 @@
 #define MINIMUM_FIRMWARE_VERSION    "0.6.6"
 #define MODE_LED_BEHAVIOUR          "MODE"
 #define DEBUG 0
+#define LED_PIN 7
 
 
 
@@ -151,6 +152,7 @@ bool getUserInput(char buffer[], uint8_t maxSize)
 
 void setup(void)
 {
+ pinMode(LED_PIN, OUTPUT);
 
  
   while (!Serial);  // required for Flora & Micro
@@ -263,7 +265,7 @@ void setup(void)
   // print it out we don't suggest using anything higher than 1 Hz
 
   // Request updates on antenna status, comment out to keep quiet
-  GPS.sendCommand(PGCMD_ANTENNA);
+//  GPS.sendCommand(PGCMD_ANTENNA);
 
 }
 uint32_t timer = millis();
@@ -277,22 +279,33 @@ char c = GPS.read();
     // a tricky thing here is if we print the NMEA sentence, or data
     // we end up not listening and catching other sentences!
     // so be very wary if using OUTPUT_ALLDATA and trytng to print out data
-    //Serial.println(GPS.lastNMEA());   // this also sets the newNMEAreceived() flag to false
+//    Serial.println(GPS.parse(GPS.lastNMEA()));   // this also sets the newNMEAreceived() flag to false
 
     if (!GPS.parse(GPS.lastNMEA()))   // this also sets the newNMEAreceived() flag to false
       return;  // we can fail to parse a sentence in which case we should just wait for another
   }
 
+  
+
   // approximately every 2 seconds or so, print out the current stats
   if (millis() - timer > 2000) {
 
+  // Light the LED solid if there's a GPS fix, otherwise flash it on and off once a second.
+  if (GPS.fix) {
+    digitalWrite(LED_PIN, HIGH);
+  }
+  else {
+    // No fix, blink the LED once a second and stop further processing.
+    digitalWrite(LED_PIN, (millis()/1000) % 2);
+    return;
+  }
 
   ble.print("AT+BLEUARTTX=");
   ble.print(step_count);
   ble.print(","); 
-  ble.print(GPS.latitude);
+  ble.print(GPS.latitudeDegrees);
   ble.print(",");
-  ble.print(GPS.longitude);
+  ble.print(GPS.longitudeDegrees);
   ble.print("\\n\n");
 
     
