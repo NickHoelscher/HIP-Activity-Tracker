@@ -300,13 +300,21 @@ char c = GPS.read();
     return;
   }
 
-  ble.print("AT+BLEUARTTX=");
+  ble.print("AT+BLEUARTTXF=");
   ble.print(step_count);
   ble.print(","); 
-  ble.print(GPS.latitudeDegrees);
+  ble.print(GPS.latitudeDegrees, 4);
   ble.print(",");
-  ble.print(GPS.longitudeDegrees);
+  ble.print(GPS.longitudeDegrees, 4);
   ble.print("\\n\n");
+
+//  Serial.print("AT+BLEUARTTX=");
+  Serial.print(step_count);
+  Serial.print(","); 
+  Serial.print(GPS.latitudeDegrees, 4);
+  Serial.print(",");
+  Serial.print(GPS.longitudeDegrees, 4);
+  Serial.print("\n\n");
 
     
     timer = millis(); // reset the timer
