@@ -13,4 +13,11 @@
 * [GPS Halloween Candy Tracker with Google Maps](https://learn.adafruit.com/track-your-treats-halloween-candy-gps-tracker/google-maps)
 * [FLORA Example Projects](https://learn.adafruit.com/category/flora)
 * [Adafruit IO Overview](https://learn.adafruit.com/adafruit-io-basics-dashboards/overview)
-* [Bluefruit LE Connect App to Adafruit IO](https://learn.adafruit.com/datalogging-hat-with-flora-ble/bluefruit-le-connect-settings)
+* [Datalogging Hat Bluefruit Settings](https://learn.adafruit.com/datalogging-hat-with-flora-ble/bluefruit-le-connect-settings)
+* [BLE Services](https://learn.adafruit.com/introducing-adafruit-ble-bluetooth-low-energy-friend/ble-services)
+  * AT+ commands and more
+* [Bluefruit LE Connect App](https://learn.adafruit.com/bluefruit-le-connect)
+* [TinyGPS++](https://github.com/mikalhart/TinyGPSPlus)
+  * alternative to Arduino_GPS library
+* [Arduino_GPS](https://github.com/adafruit/Adafruit_GPS)
+* [AT command example](https://learn.adafruit.com/introducing-the-adafruit-bluefruit-le-uart-friend/atcommand)
